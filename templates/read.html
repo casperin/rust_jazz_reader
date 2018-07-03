@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <title>♪ {{ title }}</title>
+<style>
+body {
+    font-size: 22px;
+    line-height: 1.4;
+    max-width: 44em;
+    margin: 1em auto 3em;
+}
+.post a:focus {
+    outline: 3px dotted red;
+}
+</style>
+    </head>
+    <body>
+        <em>{{ feed_title }}</em>
+        <h1><a href="{{ link|safe }}">{{ title }}</a></h1>
+        <div class=post>
+            {{ content|safe }}
+        </div>
+    </body>
+
+<script>
+const links = Array.from(document.querySelectorAll(".post a"))
+let selected = -1
+
+window.addEventListener("keypress", function(e) {
+    if (e.key === "j" || e.key === "k") {
+        selected += e.key === "j" ? 1 : -1
+        if (selected < 0) selected = links.length - 1
+        if (selected >= links.length) selected = 0
+        links[selected].focus()
+    }
+
+    if (e.key === "g") {
+        window.location.href = "{{ link|safe }}"
+    }
+})
+</script>
+</html>
