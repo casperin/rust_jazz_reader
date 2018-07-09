@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <meta name=viewport content="width=device-width">
+        {% block head %}{% endblock %}
+        <style>
+            body {
+                font-size: 22px;
+                line-height: 1.4;
+            }
+            nav a {
+                margin-right: .5em;
+            }
+            .content {
+                max-width: 44em;
+                margin: 1em auto 3em;
+            }
+            .post:focus-within {
+                outline: 3px dotted red;
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <a href=/>Unread</a>
+            <a href=/saved>Saved</a>
+            <a href=/feeds>Feeds</a>
+            <a href=/logout>Logout</a>
+        </nav>
+        <div class=content>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+    <script>
+var pos = localStorage.getItem("scroll-position")
+if (pos) {
+    window.scrollTo(0, pos)
+    localStorage.removeItem("scroll-position")
+}
+
+document.body.addEventListener("click", function (e) {
+    if (e.target.getAttribute("data-keep-scroll-position")) {
+        localStorage.setItem("scroll-position", window.scrollY)
+    }
+})
+
+const links = Array.from(document.querySelectorAll(".post .link"))
+let selected = Number(localStorage.getItem("selected") || -1)
+if (links[selected]) {
+    links[selected].focus()
+    localStorage.removeItem("selected")
+}
+
+window.addEventListener("keypress", function(e) {
+    if (e.key === "j" || e.key === "k") {
+        selected += e.key === "j" ? 1 : -1
+        if (selected < 0) selected = links.length - 1
+        if (selected >= links.length) selected = 0
+        links[selected].focus()
+    }
+
+    if (e.key === "s") {
+        const l = links[selected]
+        if (!l) return
+        localStorage.setItem("selected", selected)
+        l.parentNode.querySelector(".save").click()
+    }
+
+    if (e.key === "1") {
+        window.location.href = "/"
+    }
+    if (e.key === "2") {
+        window.location.href = "/saved"
+    }
+    if (e.key === "3") {
+        window.location.href = "/feeds"
+    }
+})
+    </script>
+</html>
+

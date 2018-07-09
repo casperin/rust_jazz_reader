@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>{{ feeds.len() }} feeds</title>
+{% endblock %}
+
+{% block content %}
+<h1>Feeds {{ feeds.len() }}</h1>
+
+{% if error != "" %}
+<mark>{{ error }}</mark><br>
+{% endif %}
+
+<form action=/preview-feed method=POST>
+    <input name=url>
+    <button type=submit>Preview feed</button>
+</form>
+
+<ul>
+{% for f in feeds %}
+    <li>
+        <a href="/feeds/{{ f.id }}">{{ f.title }}</a>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

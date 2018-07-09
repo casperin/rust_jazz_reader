@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset=utf-8>
+        <meta name=viewport content="width=device-width">
+        <title>♪ Login</title>
+        <style>
+            body { font-size: 22px; line-height: 1.4; max-width: 44em; margin: 1em auto; }
+        </style>
+    </head>
+    <body>
+        <h1>Jazz Reader</h1>
+        <form method=post>
+            <label>
+                Password:
+                <br>
+                <input type=password name=password autofocus>
+                {{ error }}
+            </label>
+            <br>
+            <button type=submit>Login</button>
+        </form>
+    </body>
+</html>

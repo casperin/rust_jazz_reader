@@ -22,7 +22,7 @@ struct ReadTpl<'a> {
 
 pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
     let id = req.match_info().get("id").expect("get id");
-    let id: i64 = match id.parse() {
+    let id: i32 = match id.parse() {
         Ok(n) => n,
         Err(e) => {
             println!("{:?}", e);
@@ -34,7 +34,7 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
         }
     };
     let stmt = "
-        select title, feed_title, link, content, description
+        select title, feed_title, link, content
         from posts where id = $1";
     let conn = req.state().db.get().expect("get db");
     let prep_stmt = conn.prepare(stmt).expect("prepare get by id statement");
@@ -48,17 +48,11 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
         return HttpResponse::Ok().content_type("text/html").body(s);
     };
     let row = result.get(0);
-    let content: String = row.get(3);
-    let desc: String = row.get(4);
     let s = ReadTpl {
         title: &row.get(0),
         feed_title: &row.get(1),
         link: &row.get(2),
-        content: if content.trim() == "" {
-            &desc
-        } else {
-            &content
-        },
+        content: &row.get(3),
     }.render()
         .expect("render readtpl");
     HttpResponse::Ok().content_type("text/html").body(s)

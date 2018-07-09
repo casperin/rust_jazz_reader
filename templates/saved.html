@@ -1,68 +1,26 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset=utf-8>
-        <title>♪ {{ posts.len() }} Saved</title>
-        <style>
-            body {
-                font-size: 22px;
-                line-height: 1.4;
-            }
-            nav a {
-                margin-right: .5em;
-            }
-            .content {
-                max-width: 44em;
-                margin: 1em auto 3em;
-            }
-            .post:focus-within {
-                outline: 3px dotted red;
-            }
-        </style>
-    </head>
-    <body>
-        <nav>
-            <a href=/>Unread</a>
-            <a href=/saved>Saved</a>
-        </nav>
-        <div class=content>
-            <h1>Saved {{ posts.len() }}</h1>
-            <ul>
-            {% for p in posts %}
-                <li style=list-style:disc class=post>
-                    <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
-                    <br>
-                    <small>
-                        <i>{{ p.feed_title }}</i> ::
-                        <a href="/forget/{{ p.id }}?to=saved">Forget</a>
-                    </small>
-                </li>
-            {% endfor %}
-            </ul>
-        </div>
-    </body>
-    <script>
-const links = Array.from(document.querySelectorAll(".post .link"))
-let selected = -1
+{% extends "base.html" %}
 
-window.addEventListener("keypress", function(e) {
-    if (e.key === "j" || e.key === "k") {
-        selected += e.key === "j" ? 1 : -1
-        if (selected < 0) selected = links.length - 1
-        if (selected >= links.length) selected = 0
-        links[selected].focus()
-    }
+{% block head %}
+<title>{{ posts.len() }} posts</title>
+{% endblock %}
 
-    if (e.key === "s") {
-        // save post
-    }
 
-    if (e.key === "1") {
-        window.location.href = "/"
-    }
-    if (e.key === "2") {
-        window.location.href = "/saved"
-    }
-})
-    </script>
-</html>
+
+{% block content %}
+    <h1>Saved {{ posts.len() }}</h1>
+    <ul>
+    {% for p in posts %}
+        <li style=list-style:disc class=post>
+            <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
+            <br>
+            <small>
+                <i>{{ p.feed_title }}</i> ::
+                <a href="/toggle-saved/{{ p.id }}?to=saved" class=save data-keep-scroll-position=true>
+                    Forget
+                </a>
+            </small>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

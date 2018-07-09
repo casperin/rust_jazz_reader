@@ -1,0 +1,24 @@
+CREATE TABLE feeds (
+    id SERIAL PRIMARY KEY NOT NULL,
+    url TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL
+);
+
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY NOT NULL,
+    guid TEXT UNIQUE NOT NULL,
+    feed_id INTEGER REFERENCES feeds(id) NOT NULL,
+    feed_title TEXT NOT NULL,
+    read BOOLEAN NOT NULL DEFAULT FALSE,
+    saved BOOLEAN NOT NULL DEFAULT FALSE,
+    title TEXT NOT NULL,
+    link TEXT NOT NULL,
+    author TEXT NOT NULL,
+    content TEXT NOT NULL
+);
+
+CREATE TABLE urls (
+    id SERIAL PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    link TEXT NOT NULL
+);

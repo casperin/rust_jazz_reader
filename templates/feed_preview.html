@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>{{ feed.title }}</title>
+{% endblock %}
+
+{% block content %}
+<form action=/add-feed method=POST>
+    <h1>
+        {{ feed.title }}
+        <input name=url value={{ feed.url }} type=hidden>
+        <button type=submit>Subscribe to feed</button>
+    </h1>
+</form>
+
+<code>{{ feed.url }}</code>
+
+<ul>
+{% for p in feed.posts %}
+    <li>{{ p.title }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

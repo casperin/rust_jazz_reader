@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>{{ title }}</title>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<code>{{ url }}</code>
+<form action=/unsubscribe method=POST style=display:inline>
+    <input value="{{ id }}" name=id type=hidden>
+    <button type=submit>Unsubscribe</button>
+</form>
+
+<ul>
+{% for p in posts %}
+    <li class=post>
+        <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
+

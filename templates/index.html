@@ -1,80 +1,34 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset=utf-8>
-        <title>♪ {{ posts.len() }} unread</title>
-        <style>
-            body {
-                font-size: 22px;
-                line-height: 1.4;
-            }
-            nav a {
-                margin-right: .5em;
-            }
-            .content {
-                max-width: 44em;
-                margin: 1em auto 3em;
-            }
-            .post:focus-within {
-                outline: 3px dotted red;
-            }
-        </style>
-    </head>
-    <body>
-        <nav>
-            <a href=/>Unread</a>
-            <a href=/saved>Saved</a>
-        </nav>
-        <div class=content>
-            <h1>
-                Unread {{ posts.len() }}
-                <form action=mark-all-as-read action=post style=display:inline>
-                    <input value="{{ ids }}" type=hidden>
-                    <button type=submit>Mark all as read</button>
-                </form>
-            </h1>
-            <ul>
-            {% for p in posts %}
-                {% if p.saved %}
-                <li style=list-style:circle class=post>
-                {% else %}
-                <li style=list-style:disc class=post>
-                {% endif %}
-                    <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
-                    <br>
-                    <small>
-                        <i>{{ p.feed_title }}</i> ::
-                        <a href="/toggle-saved/{{ p.id }}">
-                            {% if p.saved %}Forget{% else %}Save{% endif %}
-                        </a>
-                    </small>
-                </li>
-            {% endfor %}
-            </ul>
-        </div>
-    </body>
-    <script>
-const links = Array.from(document.querySelectorAll(".post .link"))
-let selected = -1
+{% extends "base.html" %}
 
-window.addEventListener("keypress", function(e) {
-    if (e.key === "j" || e.key === "k") {
-        selected += e.key === "j" ? 1 : -1
-        if (selected < 0) selected = links.length - 1
-        if (selected >= links.length) selected = 0
-        links[selected].focus()
-    }
+{% block head %}
+<title>{{ posts.len() }} posts</title>
+{% endblock %}
 
-    if (e.key === "s") {
-        // save post
-    }
 
-    if (e.key === "1") {
-        window.location.href = "/"
-    }
-    if (e.key === "2") {
-        window.location.href = "/saved"
-    }
-})
-    </script>
-</html>
+{% block content %}
+<h1>
+    Unread {{ posts.len() }}
+    <form action=mark-all-as-read method=POST style=display:inline>
+        <input value="{{ ids }}" name=ids type=hidden>
+        <button type=submit>Mark all as read</button>
+    </form>
+</h1>
+<ul>
+{% for p in posts %}
+    {% if p.saved %}
+    <li style=list-style:circle class=post>
+    {% else %}
+    <li style=list-style:disc class=post>
+    {% endif %}
+        <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
+        <br>
+        <small>
+            <i>{{ p.feed_title }}</i> ::
+            <a href="/toggle-saved/{{ p.id }}" class=save data-keep-scroll-position=true>
+                {% if p.saved %}Forget{% else %}Save{% endif %}
+            </a>
+        </small>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}

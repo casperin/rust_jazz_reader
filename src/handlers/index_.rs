@@ -1,11 +1,12 @@
 extern crate actix_web;
 extern crate askama;
+
 use self::actix_web::{HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
 
 struct Posts {
-    id: i64,
+    id: i32,
     title: String,
     feed_title: String,
     saved: bool,
@@ -19,7 +20,7 @@ struct IndexTpl {
 }
 
 pub fn index(req: HttpRequest<state::AppState>) -> HttpResponse {
-    let stmt = "select id, title, feed_title, saved from posts where status='new' order by id desc";
+    let stmt = "select id, title, feed_title, saved from posts where read=false order by id desc";
     let conn = req.state().db.get().expect("get db");
     let prep_stmt = conn.prepare(stmt).expect("prepare get unread statement");
     let posts: Vec<Posts> = prep_stmt
