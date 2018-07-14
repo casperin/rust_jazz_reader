@@ -71,7 +71,10 @@ pub fn mark_all_as_read(
         .expect("prepare mark all as read statement");
 
     for id_str in params.ids.split(",") {
-        let id: i32 = id_str.parse().unwrap();
+        let id: i32 = match id_str.parse() {
+            Ok(id) => id,
+            Err(_) => continue,
+        };
         let _ = prep_stmt.execute(&[&id]);
     }
 

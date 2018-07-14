@@ -10,7 +10,7 @@
     Unread {{ posts.len() }}
     <form action=mark-all-as-read method=POST style=display:inline>
         <input value="{{ ids }}" name=ids type=hidden>
-        <button type=submit>Mark all as read</button>
+        <button type=submit class=mark-all-as-read-btn>Mark all as read</button>
     </form>
 </h1>
 <ul>

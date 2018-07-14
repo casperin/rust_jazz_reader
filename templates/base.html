@@ -67,6 +67,11 @@ window.addEventListener("keypress", function(e) {
         l.parentNode.querySelector(".save").click()
     }
 
+    if (e.key === "m") {
+        const btn = document.querySelector(".mark-all-as-read-btn")
+        if (btn) btn.click()
+    }
+
     if (e.key === "1") {
         window.location.href = "/"
     }
