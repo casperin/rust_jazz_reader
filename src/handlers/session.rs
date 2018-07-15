@@ -6,6 +6,7 @@ use self::actix_web::middleware::identity::RequestIdentity;
 use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
+use super::error::Error;
 use super::go;
 
 #[derive(Template)]
@@ -14,13 +15,13 @@ struct Tpl {
     error: String,
 }
 
-pub fn login(_req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn login(_req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     go::render(&Tpl {
         error: "".to_string(),
     })
 }
 
-pub fn logout(mut req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn logout(mut req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     req.forget();
     go::to("/login")
 }
@@ -32,7 +33,7 @@ pub struct LoginParams {
 
 pub fn perform_login(
     (params, mut req): (Form<LoginParams>, HttpRequest<state::AppState>),
-) -> HttpResponse {
+) -> Result<HttpResponse, Error> {
     let password = state::SETTINGS.get::<String>("password").unwrap();
     if params.password == password {
         req.remember("logged-in".to_owned());

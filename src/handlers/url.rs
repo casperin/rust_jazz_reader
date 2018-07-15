@@ -4,6 +4,7 @@ extern crate serde;
 
 use self::actix_web::{Form, HttpRequest, HttpResponse};
 use super::super::state;
+use super::error::Error;
 use super::go;
 
 #[derive(Deserialize)]
@@ -13,7 +14,7 @@ pub struct SaveUrlParams {
 
 pub fn save_url(
     (params, req): (Form<SaveUrlParams>, HttpRequest<state::AppState>),
-) -> HttpResponse {
+) -> Result<HttpResponse, Error> {
     let body = match get_body(&params.url) {
         Ok(body) => body,
         Err(msg) => return go::to(&format!("/saved?msg={}", msg)),
@@ -58,7 +59,7 @@ fn find_title(text: &str) -> Option<&str> {
     Some(result)
 }
 
-pub fn forget_url(req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn forget_url(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     let id = req.match_info().get("id").expect("get id");
     let id: i32 = match id.parse() {
         Ok(n) => n,

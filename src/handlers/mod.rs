@@ -1,3 +1,4 @@
+mod error;
 pub mod feeds_;
 mod go;
 pub mod index_;

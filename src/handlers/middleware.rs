@@ -26,6 +26,6 @@ impl<S> Middleware<S> for MustBeLoggedIn {
             return Ok(Started::Done);
         }
 
-        Ok(Started::Response(go::to("/login")))
+        Ok(Started::Response(go::to("/login").unwrap()))
     }
 }

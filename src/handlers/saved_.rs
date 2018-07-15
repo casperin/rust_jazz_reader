@@ -5,6 +5,7 @@ extern crate postgres;
 use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
+use super::error::Error;
 use super::go;
 
 struct Posts {
@@ -27,11 +28,10 @@ struct SavedTpl {
     urls: Vec<Url>,
 }
 
-pub fn saved(req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn saved(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     let msg = req.query().get("msg").unwrap_or("").to_string();
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/select_saved_posts.sql"))
-        .expect("prepare get unread statement");
+    let conn = req.state().db.get()?;
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_saved_posts.sql"))?;
     let posts: Vec<Posts> = prep_stmt
         .query(&[])
         .unwrap()
@@ -44,21 +44,16 @@ pub fn saved(req: HttpRequest<state::AppState>) -> HttpResponse {
         .collect();
     go::render(&SavedTpl {
         posts: posts,
-        urls: get_urls(&req),
+        urls: get_urls(&req)?,
         msg: msg,
     })
 }
 
-pub fn toggle_saved(req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn toggle_saved(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     let to = format!("/{}", req.query().get("to").unwrap_or(""));
-    let id = req.match_info().get("id").expect("get id");
-    let id: i32 = match id.parse() {
-        Ok(n) => n,
-        Err(msg) => return go::to(&format!("{}?msg={}", to, msg)),
-    };
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/toggle_saved.sql"))
-        .expect("prepare get by id statement");
+    let id: i32 = req.match_info().get("id").expect("get id").parse()?;
+    let conn = req.state().db.get()?;
+    let prep_stmt = conn.prepare(include_str!("../../sql/toggle_saved.sql"))?;
     let _ = prep_stmt.execute(&[&id]);
     go::to(&to)
 }
@@ -70,10 +65,9 @@ pub struct MarkAsReadParams {
 
 pub fn mark_all_as_read(
     (params, req): (Form<MarkAsReadParams>, HttpRequest<state::AppState>),
-) -> HttpResponse {
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/mark_as_read.sql"))
-        .expect("prepare mark all as read statement");
+) -> Result<HttpResponse, Error> {
+    let conn = req.state().db.get()?;
+    let prep_stmt = conn.prepare(include_str!("../../sql/mark_as_read.sql"))?;
     for id_str in params.ids.split(",") {
         let id: i32 = match id_str.parse() {
             Ok(id) => id,
@@ -84,11 +78,10 @@ pub fn mark_all_as_read(
     go::to("/")
 }
 
-fn get_urls(req: &HttpRequest<state::AppState>) -> Vec<Url> {
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/select_urls.sql"))
-        .expect("prepare get urls statement");
-    prep_stmt
+fn get_urls(req: &HttpRequest<state::AppState>) -> Result<Vec<Url>, Error> {
+    let conn = req.state().db.get()?;
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_urls.sql"))?;
+    Ok(prep_stmt
         .query(&[])
         .unwrap()
         .iter()
@@ -97,5 +90,5 @@ fn get_urls(req: &HttpRequest<state::AppState>) -> Vec<Url> {
             link: row.get(1),
             title: row.get(2),
         })
-        .collect()
+        .collect())
 }

@@ -3,6 +3,7 @@ extern crate askama;
 
 use self::actix_web::{HttpRequest, HttpResponse};
 use super::super::state;
+use super::error::Error;
 use super::go;
 use askama::Template;
 
@@ -21,7 +22,7 @@ struct ReadTpl<'a> {
     content: &'a String,
 }
 
-pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
+pub fn read(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
     let id = req.match_info().get("id").expect("get id");
     let id: i32 = match id.parse() {
         Ok(n) => n,
@@ -31,9 +32,10 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
             })
         }
     };
+
     let conn = req.state().db.get().expect("get db");
     let prep_stmt = conn.prepare(include_str!("../../sql/select_post.sql"))
-        .expect("prepare get by id statement");
+        .expect("Could not prepare sql");
     let result = prep_stmt.query(&[&id]).unwrap();
     if result.is_empty() {
         return go::render(&ErrorTpl {
