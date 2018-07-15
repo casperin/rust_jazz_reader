@@ -7,8 +7,24 @@
 
 
 {% block content %}
+{% if msg.len() > 0 %}
+    <mark>{{ msg }}</mark>
+{% endif %}
+
     <h1>Saved {{ posts.len() }}</h1>
+    <form action=save-url method=POST>
+        <input name=url>
+        <button type=submit>Save url</button>
+    </form>
     <ul>
+    {% for u in urls %}
+        <li style=list-style:square class=past>
+            <a href="{{ u.link }}">{{ u.title }}</a>
+            <br>
+            <small><a href="/forget-url/{{ u.id }}">Forget</a></small>
+        </li>
+    {% endfor %}
+
     {% for p in posts %}
         <li style=list-style:disc class=post>
             <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>

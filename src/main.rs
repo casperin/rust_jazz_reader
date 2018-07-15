@@ -68,6 +68,10 @@ fn main() {
                 r.method(http::Method::POST)
                     .with(handlers::mark_all_as_read)
             })
+            .resource("/save-url", |r| {
+                r.method(http::Method::POST).with(handlers::save_url)
+            })
+            .resource("/forget-url/{id}", |r| r.f(handlers::forget_url))
             .resource("/", |r| r.f(handlers::index))
     }).bind(format!("0.0.0.0:{}", port))
         .unwrap()

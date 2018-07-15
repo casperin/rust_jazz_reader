@@ -20,9 +20,9 @@ struct IndexTpl {
 }
 
 pub fn index(req: HttpRequest<state::AppState>) -> HttpResponse {
-    let stmt = "select id, title, feed_title, saved from posts where read=false order by id desc";
     let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(stmt).expect("prepare get unread statement");
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_unread_posts.sql"))
+        .expect("prepare get unread statement");
     let posts: Vec<Posts> = prep_stmt
         .query(&[])
         .unwrap()

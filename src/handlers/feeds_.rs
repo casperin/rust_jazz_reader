@@ -2,10 +2,11 @@ extern crate actix_web;
 extern crate askama;
 extern crate serde;
 
-use self::actix_web::{http, Form, HttpRequest, HttpResponse};
+use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::rss;
 use super::super::state;
+use super::redirect;
 
 struct Feed {
     id: i32,
@@ -51,8 +52,7 @@ pub fn feed(req: HttpRequest<state::AppState>) -> HttpResponse {
     let conn = req.state().db.get().expect("get db");
 
     // Get feed
-    let feed_stmt = "select title, url from feeds where id = $1";
-    let prep_feed_stmt = conn.prepare(feed_stmt)
+    let prep_feed_stmt = conn.prepare(include_str!("../../sql/select_feed.sql"))
         .expect("prepare get feed by id statement");
     let result = prep_feed_stmt.query(&[&id]).unwrap();
     if result.is_empty() {
@@ -63,8 +63,7 @@ pub fn feed(req: HttpRequest<state::AppState>) -> HttpResponse {
     let feed_url = row.get(1);
 
     // Get posts
-    let posts_stmt = "select id, title from posts where feed_id = $1";
-    let prep_posts_stmt = conn.prepare(posts_stmt)
+    let prep_posts_stmt = conn.prepare(include_str!("../../sql/select_feed_posts.sql"))
         .expect("prepare get posts by id statement");
     let posts: Vec<FeedPost> = prep_posts_stmt
         .query(&[&id])
@@ -158,9 +157,7 @@ pub fn add_feed(
         }
     }
 
-    HttpResponse::Found()
-        .header(http::header::LOCATION, "/feeds")
-        .finish()
+    redirect::to("/feeds")
 }
 
 #[derive(Deserialize)]
@@ -174,14 +171,12 @@ pub fn unsubscribe_feed(
     let conn = req.state().db.get().expect("get db");
 
     // Delete posts
-    let post_stmt = "delete from posts where feed_id = $1";
-    let prep_post_stmt = conn.prepare(post_stmt)
+    let prep_post_stmt = conn.prepare(include_str!("../../sql/delete_feed_posts.sql"))
         .expect("prepare delete posts by feed_id statement");
     prep_post_stmt.execute(&[&params.id]).unwrap();
 
     // Delete feed
-    let feed_stmt = "delete from feeds where id = $1";
-    let prep_feed_stmt = conn.prepare(feed_stmt)
+    let prep_feed_stmt = conn.prepare(include_str!("../../sql/delete_feed.sql"))
         .expect("prepare delete feed by id statement");
     prep_feed_stmt.execute(&[&params.id]).unwrap();
 
@@ -189,9 +184,9 @@ pub fn unsubscribe_feed(
 }
 
 fn get_feeds(req: &HttpRequest<state::AppState>) -> Vec<Feed> {
-    let stmt = "select id, title from feeds order by id desc";
     let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(stmt).expect("prepare get unread statement");
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_feeds.sql"))
+        .expect("prepare get unread statement");
     prep_stmt
         .query(&[])
         .unwrap()

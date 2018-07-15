@@ -33,11 +33,9 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
             return HttpResponse::Ok().content_type("text/html").body(s);
         }
     };
-    let stmt = "
-        select title, feed_title, link, content
-        from posts where id = $1";
     let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(stmt).expect("prepare get by id statement");
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_post.sql"))
+        .expect("prepare get by id statement");
     let result = prep_stmt.query(&[&id]).unwrap();
     if result.is_empty() {
         let s = ErrorTpl {

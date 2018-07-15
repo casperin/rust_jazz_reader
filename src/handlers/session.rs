@@ -3,9 +3,10 @@ extern crate askama;
 extern crate serde;
 
 use self::actix_web::middleware::identity::RequestIdentity;
-use self::actix_web::{http, Form, HttpRequest, HttpResponse};
+use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
+use super::redirect;
 
 #[derive(Template)]
 #[template(path = "login.html")]
@@ -23,9 +24,7 @@ pub fn login(_req: HttpRequest<state::AppState>) -> HttpResponse {
 
 pub fn logout(mut req: HttpRequest<state::AppState>) -> HttpResponse {
     req.forget();
-    return HttpResponse::Found()
-        .header(http::header::LOCATION, "/login")
-        .finish();
+    redirect::to("/login")
 }
 
 #[derive(Deserialize)]
@@ -39,9 +38,7 @@ pub fn perform_login(
     let password = state::SETTINGS.get::<String>("password").unwrap();
     if params.password == password {
         req.remember("logged-in".to_owned());
-        return HttpResponse::Found()
-            .header(http::header::LOCATION, "/")
-            .finish();
+        return redirect::to("/");
     };
 
     let s = Tpl {
