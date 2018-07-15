@@ -3,6 +3,7 @@ extern crate askama;
 
 use self::actix_web::{HttpRequest, HttpResponse};
 use super::super::state;
+use super::go;
 use askama::Template;
 
 #[derive(Template)]
@@ -25,12 +26,9 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
     let id: i32 = match id.parse() {
         Ok(n) => n,
         Err(e) => {
-            println!("{:?}", e);
-            let s = ErrorTpl {
+            return go::render(&ErrorTpl {
                 error: &e.to_string(),
-            }.render()
-                .unwrap();
-            return HttpResponse::Ok().content_type("text/html").body(s);
+            })
         }
     };
     let conn = req.state().db.get().expect("get db");
@@ -38,20 +36,15 @@ pub fn read(req: HttpRequest<state::AppState>) -> HttpResponse {
         .expect("prepare get by id statement");
     let result = prep_stmt.query(&[&id]).unwrap();
     if result.is_empty() {
-        let s = ErrorTpl {
+        return go::render(&ErrorTpl {
             error: &"Could not find post".to_string(),
-        }.render()
-            .unwrap();
-
-        return HttpResponse::Ok().content_type("text/html").body(s);
+        });
     };
     let row = result.get(0);
-    let s = ReadTpl {
+    go::render(&ReadTpl {
         title: &row.get(0),
         feed_title: &row.get(1),
         link: &row.get(2),
         content: &row.get(3),
-    }.render()
-        .expect("render readtpl");
-    HttpResponse::Ok().content_type("text/html").body(s)
+    })
 }

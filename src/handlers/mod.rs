@@ -1,8 +1,8 @@
 pub mod feeds_;
+mod go;
 pub mod index_;
 pub mod middleware;
 pub mod read_;
-mod redirect;
 pub mod saved_;
 pub mod session;
 pub mod url;

@@ -3,7 +3,7 @@ extern crate actix_web;
 use self::actix_web::middleware::identity::RequestIdentity;
 use self::actix_web::middleware::{Middleware, Started};
 use self::actix_web::{HttpRequest, Result};
-use super::redirect;
+use super::go;
 
 pub struct MustBeLoggedIn {
     allowed: &'static [&'static str],
@@ -26,6 +26,6 @@ impl<S> Middleware<S> for MustBeLoggedIn {
             return Ok(Started::Done);
         }
 
-        Ok(Started::Response(redirect::to("/login")))
+        Ok(Started::Response(go::to("/login")))
     }
 }

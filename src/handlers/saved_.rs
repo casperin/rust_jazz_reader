@@ -5,7 +5,7 @@ extern crate postgres;
 use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
-use super::redirect;
+use super::go;
 
 struct Posts {
     id: i32,
@@ -42,13 +42,11 @@ pub fn saved(req: HttpRequest<state::AppState>) -> HttpResponse {
             feed_title: row.get(2),
         })
         .collect();
-    let s = SavedTpl {
+    go::render(&SavedTpl {
         posts: posts,
         urls: get_urls(&req),
         msg: msg,
-    }.render()
-        .unwrap();
-    HttpResponse::Ok().content_type("text/html").body(s)
+    })
 }
 
 pub fn toggle_saved(req: HttpRequest<state::AppState>) -> HttpResponse {
@@ -56,13 +54,13 @@ pub fn toggle_saved(req: HttpRequest<state::AppState>) -> HttpResponse {
     let id = req.match_info().get("id").expect("get id");
     let id: i32 = match id.parse() {
         Ok(n) => n,
-        Err(msg) => return redirect::to(&format!("{}?msg={}", to, msg)),
+        Err(msg) => return go::to(&format!("{}?msg={}", to, msg)),
     };
     let conn = req.state().db.get().expect("get db");
     let prep_stmt = conn.prepare(include_str!("../../sql/toggle_saved.sql"))
         .expect("prepare get by id statement");
     let _ = prep_stmt.execute(&[&id]);
-    redirect::to(&to)
+    go::to(&to)
 }
 
 #[derive(Deserialize)]
@@ -83,7 +81,7 @@ pub fn mark_all_as_read(
         };
         let _ = prep_stmt.execute(&[&id]);
     }
-    redirect::to("/")
+    go::to("/")
 }
 
 fn get_urls(req: &HttpRequest<state::AppState>) -> Vec<Url> {

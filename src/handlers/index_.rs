@@ -4,6 +4,7 @@ extern crate askama;
 use self::actix_web::{HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::state;
+use super::go;
 
 struct Posts {
     id: i32,
@@ -35,10 +36,8 @@ pub fn index(req: HttpRequest<state::AppState>) -> HttpResponse {
         })
         .collect();
     let ids: Vec<String> = posts.iter().map(|p| p.id.to_string()).collect();
-    let s = IndexTpl {
+    go::render(&IndexTpl {
         posts: posts,
         ids: ids.join(","),
-    }.render()
-        .unwrap();
-    HttpResponse::Ok().content_type("text/html").body(s)
+    })
 }

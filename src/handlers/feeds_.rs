@@ -6,7 +6,7 @@ use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
 use super::super::rss;
 use super::super::state;
-use super::redirect;
+use super::go;
 
 struct Feed {
     id: i32,
@@ -21,12 +21,10 @@ struct FeedsTpl {
 }
 
 pub fn feeds(req: HttpRequest<state::AppState>) -> HttpResponse {
-    let s = FeedsTpl {
+    go::render(&FeedsTpl {
         feeds: get_feeds(&req),
         error: String::new(),
-    }.render()
-        .unwrap();
-    HttpResponse::Ok().content_type("text/html").body(s)
+    })
 }
 
 struct FeedPost {
@@ -75,15 +73,12 @@ pub fn feed(req: HttpRequest<state::AppState>) -> HttpResponse {
         })
         .collect();
 
-    let s = FeedTpl {
+    go::render(&FeedTpl {
         id: id,
         title: feed_title,
         url: feed_url,
         posts: posts,
-    }.render()
-        .unwrap();
-
-    HttpResponse::Ok().content_type("text/html").body(s)
+    })
 }
 
 #[derive(Template)]
@@ -100,16 +95,13 @@ pub struct PreviewParams {
 pub fn preview_feed(
     (params, req): (Form<PreviewParams>, HttpRequest<state::AppState>),
 ) -> HttpResponse {
-    let tpl = match rss::feed::fetch(&params.url) {
-        Ok(feed) => PreviewFeedsTpl { feed: feed }.render(),
-        Err(err) => FeedsTpl {
+    match rss::feed::fetch(&params.url) {
+        Ok(feed) => go::render(&PreviewFeedsTpl { feed: feed }),
+        Err(err) => go::render(&FeedsTpl {
             feeds: get_feeds(&req),
             error: err,
-        }.render(),
-    };
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body(tpl.unwrap())
+        }),
+    }
 }
 
 pub fn add_feed(
@@ -157,7 +149,7 @@ pub fn add_feed(
         }
     }
 
-    redirect::to("/feeds")
+    go::to("/feeds")
 }
 
 #[derive(Deserialize)]
@@ -199,11 +191,8 @@ fn get_feeds(req: &HttpRequest<state::AppState>) -> Vec<Feed> {
 }
 
 fn show_error(req: &HttpRequest<state::AppState>, err: String) -> HttpResponse {
-    println!("Error: {}", err);
-    let s = FeedsTpl {
+    go::render(&FeedsTpl {
         feeds: get_feeds(req),
         error: err,
-    }.render()
-        .unwrap();
-    return HttpResponse::Ok().content_type("text/html").body(s);
+    })
 }
