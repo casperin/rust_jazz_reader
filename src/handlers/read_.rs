@@ -1,17 +1,11 @@
 extern crate actix_web;
 extern crate askama;
 
-use self::actix_web::{HttpRequest, HttpResponse};
-use super::super::state;
+use self::actix_web::{HttpResponse, Path, State};
+use super::super::state::AppState;
 use super::error::Error;
 use super::go;
 use askama::Template;
-
-#[derive(Template)]
-#[template(path = "404.html")]
-struct ErrorTpl<'a> {
-    error: &'a String,
-}
 
 #[derive(Template)]
 #[template(path = "read.html")]
@@ -22,27 +16,23 @@ struct ReadTpl<'a> {
     content: &'a String,
 }
 
-pub fn read(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
-    let id = req.match_info().get("id").expect("get id");
-    let id: i32 = match id.parse() {
-        Ok(n) => n,
-        Err(e) => {
-            return go::render(&ErrorTpl {
-                error: &e.to_string(),
-            })
-        }
+#[derive(Deserialize)]
+pub struct ReadParams {
+    id: i32,
+}
+
+pub fn read((params, state): (Path<ReadParams>, State<AppState>)) -> Result<HttpResponse, Error> {
+    let conn = state.db.get()?;
+    let result = conn.prepare(include_str!("../../sql/select_post.sql"))?
+        .query(&[&params.id])
+        .unwrap();
+
+    if result.is_empty() {
+        return Err(Error::InternalError);
     };
 
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/select_post.sql"))
-        .expect("Could not prepare sql");
-    let result = prep_stmt.query(&[&id]).unwrap();
-    if result.is_empty() {
-        return go::render(&ErrorTpl {
-            error: &"Could not find post".to_string(),
-        });
-    };
     let row = result.get(0);
+
     go::render(&ReadTpl {
         title: &row.get(0),
         feed_title: &row.get(1),

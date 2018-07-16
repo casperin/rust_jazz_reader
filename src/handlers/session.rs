@@ -5,7 +5,7 @@ extern crate serde;
 use self::actix_web::middleware::identity::RequestIdentity;
 use self::actix_web::{Form, HttpRequest, HttpResponse};
 use self::askama::Template;
-use super::super::state;
+use super::super::state::{AppState, SETTINGS};
 use super::error::Error;
 use super::go;
 
@@ -15,13 +15,13 @@ struct Tpl {
     error: String,
 }
 
-pub fn login(_req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
+pub fn login(_req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
     go::render(&Tpl {
         error: "".to_string(),
     })
 }
 
-pub fn logout(mut req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
+pub fn logout(mut req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
     req.forget();
     go::to("/login")
 }
@@ -32,9 +32,9 @@ pub struct LoginParams {
 }
 
 pub fn perform_login(
-    (params, mut req): (Form<LoginParams>, HttpRequest<state::AppState>),
+    (params, mut req): (Form<LoginParams>, HttpRequest<AppState>),
 ) -> Result<HttpResponse, Error> {
-    let password = state::SETTINGS.get::<String>("password").unwrap();
+    let password = SETTINGS.get::<String>("password").unwrap();
     if params.password == password {
         req.remember("logged-in".to_owned());
         return go::to("/");

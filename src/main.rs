@@ -49,11 +49,11 @@ fn main() {
             .resource("/logout", |r| {
                 r.method(http::Method::GET).with(handlers::logout)
             })
-            .resource("/read/{id}", |r| r.f(handlers::read))
-            .resource("/toggle-saved/{id}", |r| r.f(handlers::toggle_saved))
-            .resource("/saved", |r| r.f(handlers::saved))
-            .resource("/feeds", |r| r.f(handlers::feeds))
-            .resource("/feeds/{id}", |r| r.f(handlers::feed))
+            .resource("/read/{id}", |r| r.with(handlers::read))
+            .resource("/toggle-saved/{id}", |r| r.with(handlers::toggle_saved))
+            .resource("/saved", |r| r.with(handlers::saved))
+            .resource("/feeds", |r| r.with(handlers::feeds))
+            .resource("/feeds/{id}", |r| r.with(handlers::feed))
             .resource("/preview-feed", |r| {
                 r.method(http::Method::POST).with(handlers::preview_feed)
             })
@@ -71,8 +71,8 @@ fn main() {
             .resource("/save-url", |r| {
                 r.method(http::Method::POST).with(handlers::save_url)
             })
-            .resource("/forget-url/{id}", |r| r.f(handlers::forget_url))
-            .resource("/", |r| r.f(handlers::index))
+            .resource("/forget-url/{id}", |r| r.with(handlers::forget_url))
+            .resource("/", |r| r.with(handlers::index))
     }).bind(format!("0.0.0.0:{}", port))
         .unwrap()
         .start();

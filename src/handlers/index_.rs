@@ -2,9 +2,9 @@ extern crate actix_web;
 extern crate askama;
 extern crate r2d2;
 
-use self::actix_web::{HttpRequest, HttpResponse, Result};
+use self::actix_web::{HttpResponse, Result, State};
 use self::askama::Template;
-use super::super::state;
+use super::super::state::AppState;
 use super::error::Error;
 use super::go;
 
@@ -22,8 +22,8 @@ struct IndexTpl {
     posts: Vec<Posts>,
 }
 
-pub fn index(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
-    let db = req.state().db.get()?;
+pub fn index(state: State<AppState>) -> Result<HttpResponse, Error> {
+    let db = state.db.get()?;
     let posts: Vec<Posts> = db.prepare(include_str!("../../sql/select_unread_posts.sql"))?
         .query(&[])
         .unwrap()

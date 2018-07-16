@@ -2,8 +2,8 @@ extern crate actix_web;
 extern crate reqwest;
 extern crate serde;
 
-use self::actix_web::{Form, HttpRequest, HttpResponse};
-use super::super::state;
+use self::actix_web::{Form, HttpResponse, Path, State};
+use super::super::state::AppState;
 use super::error::Error;
 use super::go;
 
@@ -13,14 +13,14 @@ pub struct SaveUrlParams {
 }
 
 pub fn save_url(
-    (params, req): (Form<SaveUrlParams>, HttpRequest<state::AppState>),
+    (params, state): (Form<SaveUrlParams>, State<AppState>),
 ) -> Result<HttpResponse, Error> {
     let body = match get_body(&params.url) {
         Ok(body) => body,
         Err(msg) => return go::to(&format!("/saved?msg={}", msg)),
     };
     let title = find_title(&body).unwrap_or(&params.url);
-    let conn = req.state().db.get().expect("get db");
+    let conn = state.db.get().expect("get db");
     let prep_stmt = conn.prepare(include_str!("../../sql/insert_url.sql"))
         .expect("prepare inserting url");
     let _ = prep_stmt.execute(&[&params.url, &title]);
@@ -59,15 +59,16 @@ fn find_title(text: &str) -> Option<&str> {
     Some(result)
 }
 
-pub fn forget_url(req: HttpRequest<state::AppState>) -> Result<HttpResponse, Error> {
-    let id = req.match_info().get("id").expect("get id");
-    let id: i32 = match id.parse() {
-        Ok(n) => n,
-        Err(msg) => return go::to(&format!("/saved?msg={}", msg)),
-    };
-    let conn = req.state().db.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/forget_url.sql"))
-        .expect("prepare delete url statement");
-    let _ = prep_stmt.execute(&[&id]);
+#[derive(Deserialize)]
+pub struct ForgetUrlParams {
+    id: i32,
+}
+
+pub fn forget_url(
+    (params, state): (Path<ForgetUrlParams>, State<AppState>),
+) -> Result<HttpResponse, Error> {
+    let conn = state.db.get()?;
+    let prep_stmt = conn.prepare(include_str!("../../sql/forget_url.sql"))?;
+    let _ = prep_stmt.execute(&[&params.id]);
     go::to("/saved")
 }
