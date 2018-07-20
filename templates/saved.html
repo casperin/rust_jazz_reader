@@ -19,9 +19,9 @@
     <ul>
     {% for u in urls %}
         <li style=list-style:square class=past>
-            <a href="{{ u.link }}">{{ u.title }}</a>
+            <a href="{{ u.link }}" target=_BLANK class=link>{{ u.title }}</a>
             <br>
-            <small><a href="/forget-url/{{ u.id }}">Forget</a></small>
+            <small><a href="/forget-url/{{ u.id }}" class=save data-keep-scroll-position=true>Forget</a></small>
         </li>
     {% endfor %}
 

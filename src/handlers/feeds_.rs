@@ -31,6 +31,7 @@ pub fn feeds(state: State<AppState>) -> Result<HttpResponse, Error> {
 struct FeedPost {
     id: i32,
     title: String,
+    saved: bool,
 }
 
 #[derive(Template)]
@@ -69,6 +70,7 @@ pub fn feed((params, state): (Path<FeedParams>, State<AppState>)) -> Result<Http
         .map(|row| FeedPost {
             id: row.get(0),
             title: row.get(1),
+            saved: row.get(2),
         })
         .collect();
 

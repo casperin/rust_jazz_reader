@@ -16,7 +16,7 @@
                 max-width: 44em;
                 margin: 1em auto 3em;
             }
-            .post:focus-within {
+            li:focus-within {
                 outline: 3px dotted red;
             }
         </style>
@@ -45,12 +45,18 @@ document.body.addEventListener("click", function (e) {
     }
 })
 
-const links = Array.from(document.querySelectorAll(".post .link"))
+const links = Array.from(document.querySelectorAll(".link"))
 let selected = Number(localStorage.getItem("selected") || -1)
 if (links[selected]) {
     links[selected].focus()
     localStorage.removeItem("selected")
 }
+
+links.forEach((link, i) => {
+    link.addEventListener("focus", function() {
+        selected = i
+    })
+})
 
 window.addEventListener("keypress", function(e) {
     if (e.key === "j" || e.key === "k") {

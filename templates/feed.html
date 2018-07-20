@@ -18,6 +18,12 @@
 {% for p in posts %}
     <li class=post>
         <a href="/read/{{ p.id }}" target=_BLANK class=link>{{ p.title }}</a>
+        <br />
+        <small>
+            <a href="/toggle-saved/{{ p.id }}?to=feeds/{{ id }}" class=save data-keep-scroll-position=true>
+                {% if p.saved %}Forget{% else %}Save{% endif %}
+            </a>
+        </small>
     </li>
 {% endfor %}
 </ul>
