@@ -14,11 +14,11 @@ pub fn start_sync(
     thread::sleep(time::Duration::from_secs(120)); // wait 2 min before starting
 
     let frequency = time::Duration::from_secs(frequency_min * 60);
-    let stmt = "select id, url from feeds;";
+    let conn = db_pool.get().expect("get db");
+    let prep_stmt = conn.prepare(include_str!("../../sql/select_feeds_for_sync.sql"))
+        .expect("prepare get unread statement");
 
     loop {
-        let conn = db_pool.get().expect("get db");
-        let prep_stmt = conn.prepare(stmt).expect("prepare get unread statement");
         let rows = prep_stmt.query(&[]).unwrap();
 
         for row in rows.iter() {

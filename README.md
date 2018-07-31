@@ -1,7 +1,5 @@
-This is my (probably) very messy attempt at building something a little more
-substantial in Rust.
+# Rust Jazz Reader
 
-It is (pretty much) a one to one replication of my personal RSS reader, which
-I've so far done in JS, Elixir, and Go.
-
-Do not consider this production code. It is a learning project.
+My goto "learn a new language" project is an RSS reader. This is the fourth
+version, and is done in Rust. This is also the version likely to remain in
+production.
