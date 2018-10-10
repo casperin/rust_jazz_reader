@@ -10,13 +10,13 @@
                 font: 19px/1.3 sans-serif;
             }
             *:focus {
-                outline: 2px solid orange;
+                outline: 4px solid #fb7;
                 outline-offset: 0;
             }
             nav a {
                 margin-right: .5em;
             }
-            .content {
+            main {
                 max-width: 44em;
                 margin: 1em auto 3em;
             }
@@ -34,9 +34,9 @@
             <a href=/feeds>Feeds</a>
             <a href=/logout>Logout</a>
         </nav>
-        <div class=content>
+        <main>
             {% block content %}{% endblock %}
-        </div>
+        <main>
     </body>
     <script>
 var pos = localStorage.getItem("scroll-position")
