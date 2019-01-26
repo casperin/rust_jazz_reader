@@ -21,7 +21,7 @@ pub fn login(_req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
     })
 }
 
-pub fn logout(mut req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
+pub fn logout(req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
     req.forget();
     go::to("/login")
 }
@@ -32,7 +32,7 @@ pub struct LoginParams {
 }
 
 pub fn perform_login(
-    (params, mut req): (Form<LoginParams>, HttpRequest<AppState>),
+    (params, req): (Form<LoginParams>, HttpRequest<AppState>),
 ) -> Result<HttpResponse, Error> {
     let password = SETTINGS.get::<String>("password").unwrap();
     if params.password == password {

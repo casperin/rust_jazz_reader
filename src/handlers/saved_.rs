@@ -35,7 +35,8 @@ pub fn saved(
     let conn = state.db.get()?;
 
     // Posts
-    let posts = conn.prepare(include_str!("../../sql/select_saved_posts.sql"))?
+    let posts = conn
+        .prepare(include_str!("../../sql/select_saved_posts.sql"))?
         .query(&[])
         .unwrap()
         .iter()
@@ -47,7 +48,8 @@ pub fn saved(
         .collect();
 
     // Urls
-    let urls = conn.prepare(include_str!("../../sql/select_urls.sql"))?
+    let urls = conn
+        .prepare(include_str!("../../sql/select_urls.sql"))?
         .query(&[])
         .unwrap()
         .iter()
@@ -66,7 +68,7 @@ pub fn saved(
 }
 
 pub fn toggle_saved(req: HttpRequest<AppState>) -> Result<HttpResponse, Error> {
-    let to = format!("/{}", req.query().get("to").unwrap_or(""));
+    let to = format!("/{}", req.query().get("to").unwrap_or(&"".to_string()));
     let id: i32 = req.match_info().get("id").expect("get id").parse()?;
     let conn = req.state().db.get()?;
     let prep_stmt = conn.prepare(include_str!("../../sql/toggle_saved.sql"))?;

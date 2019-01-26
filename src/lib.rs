@@ -1,4 +1,5 @@
 #[macro_use]
+extern crate log;
 extern crate askama;
 #[macro_use]
 extern crate lazy_static;

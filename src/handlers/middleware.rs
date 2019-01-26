@@ -16,8 +16,9 @@ impl MustBeLoggedIn {
 }
 
 impl<S> Middleware<S> for MustBeLoggedIn {
-    fn start(&self, req: &mut HttpRequest<S>) -> Result<Started> {
-        if let Some("logged-in") = req.identity() {
+    fn start(&self, req: &HttpRequest<S>) -> Result<Started> {
+        let _s = String::from("logged-in");
+        if let Some(_s) = req.identity() {
             return Ok(Started::Done);
         }
 

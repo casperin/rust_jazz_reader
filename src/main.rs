@@ -1,7 +1,9 @@
 extern crate actix;
 extern crate actix_web;
 extern crate askama;
+extern crate env_logger;
 extern crate jazz_reader;
+extern crate log;
 extern crate postgres;
 extern crate r2d2;
 extern crate r2d2_postgres;
@@ -17,6 +19,7 @@ use jazz_reader::rss;
 use jazz_reader::state::{AppState, SETTINGS};
 
 fn main() {
+    env_logger::init();
     let port: String = SETTINGS.get("port").unwrap();
     let sys = actix::System::new("template-askama");
     let conn_string = format!(
@@ -73,11 +76,10 @@ fn main() {
             })
             .resource("/forget-url/{id}", |r| r.with(handlers::forget_url))
             .resource("/", |r| r.with(handlers::index))
-    }).bind(format!("0.0.0.0:{}", port))
-        .unwrap()
-        .start();
-
-    println!("Server started on port {}", port);
+    })
+    .bind(format!("0.0.0.0:{}", port))
+    .unwrap()
+    .start();
 
     let _ = sys.run();
 }

@@ -1,3 +1,4 @@
+extern crate env_logger;
 extern crate r2d2;
 extern crate r2d2_postgres;
 extern crate rss;
@@ -15,7 +16,8 @@ pub fn start_sync(
 
     let frequency = time::Duration::from_secs(frequency_min * 60);
     let conn = db_pool.get().expect("get db");
-    let prep_stmt = conn.prepare(include_str!("../../sql/select_feeds_for_sync.sql"))
+    let prep_stmt = conn
+        .prepare(include_str!("../../sql/select_feeds_for_sync.sql"))
         .expect("prepare get unread statement");
 
     loop {
@@ -27,13 +29,14 @@ pub fn start_sync(
             let feed = match feed::fetch(&url) {
                 Ok(chan) => chan,
                 Err(err) => {
-                    println!("Got an error when fetching {}: {}", url, err);
+                    info!("{}", err);
                     break;
                 }
             };
 
             for post in feed.posts.iter() {
-                let r = conn.prepare(include_str!("../../sql/insert_post.sql"))
+                let r = conn
+                    .prepare(include_str!("../../sql/insert_post.sql"))
                     .expect("prepare insert post sql")
                     .execute(&[
                         &post.guid,
@@ -46,7 +49,7 @@ pub fn start_sync(
                     ]);
 
                 if let Err(err) = r {
-                    println!(
+                    error!(
                         "Error inserting post {} from {}: {}",
                         post.title, feed.title, err
                     );
