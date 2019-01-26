@@ -29,7 +29,7 @@ pub fn start_sync(
             let feed = match feed::fetch(&url) {
                 Ok(chan) => chan,
                 Err(err) => {
-                    info!("{}", err);
+                    info!("Feed error, {}: {}", url, err);
                     break;
                 }
             };
