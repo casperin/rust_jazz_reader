@@ -2,8 +2,8 @@
 <html>
     <head>
         <meta charset=utf-8>
-        <meta name=viewport content=width=device-width>
-        <link rel=icon href=data:;base64,=>
+        <meta name=viewport content="width=device-width">
+        <link rel=icon href="data:;base64,=">
         {% block head %}{% endblock %}
         <style>
             body {
@@ -36,64 +36,64 @@
         </nav>
         <main>
             {% block content %}{% endblock %}
-        <main>
+        </main>
+        <script>
+            var pos = localStorage.getItem("scroll-position")
+            if (pos) {
+                window.scrollTo(0, pos)
+                localStorage.removeItem("scroll-position")
+            }
+
+            document.body.addEventListener("click", function (e) {
+                if (e.target.getAttribute("data-keep-scroll-position")) {
+                    localStorage.setItem("scroll-position", window.scrollY)
+                }
+            })
+
+            const links = Array.from(document.querySelectorAll(".link"))
+            let selected = Number(localStorage.getItem("selected") || -1)
+            if (links[selected]) {
+                links[selected].focus()
+                localStorage.removeItem("selected")
+            }
+
+            links.forEach((link, i) => {
+                link.addEventListener("focus", function() {
+                    selected = i
+                })
+            })
+
+            window.addEventListener("keypress", function(e) {
+                if (e.key === "j" || e.key === "k") {
+                    selected += e.key === "j" ? 1 : -1
+                    if (selected < 0) selected = links.length - 1
+                    if (selected >= links.length) selected = 0
+                    links[selected].focus()
+                }
+
+                if (e.key === "s") {
+                    const l = links[selected]
+                    if (!l) return
+                    localStorage.setItem("selected", selected)
+                    l.parentNode.querySelector(".save").click()
+                }
+
+                if (e.key === "m") {
+                    const btn = document.querySelector(".mark-all-as-read-btn")
+                    if (btn) btn.click()
+                }
+
+                if (e.key === "1") {
+                    window.location.href = "/"
+                }
+                if (e.key === "2") {
+                    window.location.href = "/saved"
+                }
+                if (e.key === "3") {
+                    window.location.href = "/feeds"
+                }
+            })
+        </script>
     </body>
-    <script>
-var pos = localStorage.getItem("scroll-position")
-if (pos) {
-    window.scrollTo(0, pos)
-    localStorage.removeItem("scroll-position")
-}
-
-document.body.addEventListener("click", function (e) {
-    if (e.target.getAttribute("data-keep-scroll-position")) {
-        localStorage.setItem("scroll-position", window.scrollY)
-    }
-})
-
-const links = Array.from(document.querySelectorAll(".link"))
-let selected = Number(localStorage.getItem("selected") || -1)
-if (links[selected]) {
-    links[selected].focus()
-    localStorage.removeItem("selected")
-}
-
-links.forEach((link, i) => {
-    link.addEventListener("focus", function() {
-        selected = i
-    })
-})
-
-window.addEventListener("keypress", function(e) {
-    if (e.key === "j" || e.key === "k") {
-        selected += e.key === "j" ? 1 : -1
-        if (selected < 0) selected = links.length - 1
-        if (selected >= links.length) selected = 0
-        links[selected].focus()
-    }
-
-    if (e.key === "s") {
-        const l = links[selected]
-        if (!l) return
-        localStorage.setItem("selected", selected)
-        l.parentNode.querySelector(".save").click()
-    }
-
-    if (e.key === "m") {
-        const btn = document.querySelector(".mark-all-as-read-btn")
-        if (btn) btn.click()
-    }
-
-    if (e.key === "1") {
-        window.location.href = "/"
-    }
-    if (e.key === "2") {
-        window.location.href = "/saved"
-    }
-    if (e.key === "3") {
-        window.location.href = "/feeds"
-    }
-})
-    </script>
 </html>
 
